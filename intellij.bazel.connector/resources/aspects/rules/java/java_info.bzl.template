@@ -121,13 +121,17 @@ def extract_java_runtime(target, ctx, output_groups, dep_targets, **kwargs):
             f for f in getattr(provider, "full_compile_jars", depset()).to_list()
             if not f.basename.endswith("-hjar.jar") and f.owner.package == ctx.label.package
         ]
+        src_jars = [
+            f for f in getattr(provider, "source_jars", [])
+            if f.owner.package == ctx.label.package
+        ]
         if full_compile:
             jars = [struct(
                 binary_jars = [file_location(f)],
                 interface_jars = [],
-                source_jars = [],
+                source_jars = [file_location(s) for s in src_jars],
             ) for f in full_compile]
-            resolve_files_jars = full_compile
+            resolve_files_jars = full_compile + src_jars
 
     generated_jars, resolve_files_generated_jars = get_generated_jars(provider)
     
